@@ -36,7 +36,7 @@ log_file_handler = logging.FileHandler(os.path.join(os.getcwd(), 'es_data_remove
 with codecs.open('/etc/es_data_remover/config.json', 'rb', 'utf-8') as _:
     es_hosts = json.loads(_.read())["es_hosts"]
 json_base_dir = '/etc/es_data_remover/setting/'
-log_file_handler = logging.FileHandler(os.path.join(os.getcwd(), '/var/log/es_data_remover.log'))
+log_file_handler = logging.FileHandler('/var/log/es_data_remover.log')
 # """
 
 logger = logging.getLogger(name=__name__)    # 生成一个日志对象
@@ -54,6 +54,7 @@ def run_clean(json_dict):
         logger.warn('failed to connect to %s: %s' % (es_hosts, ex))
 
     es_index = json_dict.pop('index')
+    es_type = json_dict.pop('type')
     search_project = json_dict.pop('project')
     search_body = {
         "query": {
@@ -103,7 +104,7 @@ def run_clean(json_dict):
 
         for hit in es_response['hits']['hits']:
             logger.info("deleting %s" % (hit["_id"]))
-            # self.es_client.delete(index=self.es_index, doc_type=self.__type__, id=hit["_id"])
+            es_client.delete(index=es_index, doc_type=es_type, id=hit["_id"])
 
 
 def get_files_list(base_dir):
